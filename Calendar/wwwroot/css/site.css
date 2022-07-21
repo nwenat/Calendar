@@ -1,0 +1,35 @@
+﻿.alldays{
+    background-color: lavender;
+}
+
+.today{
+    background-color:lightskyblue;
+}
+
+.weekend {
+    background-color: #F1E5AC;
+}
+
+.btn.highP {
+    background-color: lightcoral;
+}
+.btn.mediumP {
+    background-color:cornflowerblue;
+}
+.btn.lowP {
+    background-color:palegreen;
+}
+
+.btn.greybtn {
+    background-color:gray;
+}
+
+.navbar.greynav {
+    background-color: gray;
+}
+
+.bottomdiv {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}

@@ -1,0 +1,54 @@
+﻿@model IEnumerable<IdentityRole>
+
+@inject IAuthorizationService authorizationService
+
+@{
+    ViewBag.Title = "Wszystkie grupy";
+}
+
+<div class="container">
+    @if (Model.Any())
+    {
+        <div class="col">
+            <h1 class="text-center">Wszystkie grupy</h1>
+
+            @foreach (var role in Model)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Id: @role.Id</h3>
+                    </div>
+                    <div class="card-body">
+                        <h3>Nazwa grupy: @role.Name</h3>
+                    </div>
+                    <div class="card-footer">
+                        <form method="post" asp-action="DeleteRole" asp-route-id="@role.Id">
+
+                            <a asp-action="EditRole" asp-controller="Administration" asp-route-id="@role.Id" class="btn btn-primary">Edytuj</a>
+                            <span id="confirmDeleteSpan_@role.Id" style="display:none">
+                                <span>Are you sure you want to delete?</span>
+                                <button type="submit" class="btn btn-danger">Tak</button>
+                                <a href="#" class="btn btn-primary" onclick="confirmDelete('@role.Id', false)">Nie</a>
+                            </span>
+                            <span id="deleteSpan_@role.Id">
+                                <a href="#" class="btn btn-danger" onclick="confirmDelete('@role.Id', true)">Usuń</a>
+                            </span>
+                        </form>
+                    </div>
+                </div>
+                <br/>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="col">
+            <h1 class="text-center">Nie ma żadnych grup (ról) jeszcze</h1>
+
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/CustomScript.js"></script>
+}

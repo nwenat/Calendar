@@ -1,0 +1,214 @@
+﻿@model IndexViewModel
+@inject SignInManager<IdentityUser> signInManager;
+
+@{
+    ViewBag.Title = "Twój kalendarz";
+    var today = ViewBag.Today;
+}
+<div class="container-fluid">
+
+    @if (signInManager.IsSignedIn(User))
+    {
+        <div class="row justify-content-between my-3">
+            <div class="col col-auto mr-auto">
+                <a asp-controller="home" asp-action="index" asp-route-page="@(Model.page - 1)" asp-route-uN="@User.Identity.Name" class="btn btn-secondary greybtn">
+                    <h5 class=" font-weight-bold">Poprzedni</h5>
+                </a>
+            </div>
+            <div class="col d-flex justify-content-center">
+                <a asp-controller="home" asp-action="index" asp-route-uN="@User.Identity.Name" class="btn btn-secondary greybtn">
+                    <h5 class=" font-weight-bold">Twój obecny tydzień</h5>
+                </a>
+            </div>
+            <div class="col col-auto">
+                <a asp-controller="home" asp-action="index" asp-route-page="@(Model.page + 1)" asp-route-uN="@User.Identity.Name" class="btn btn-secondary greybtn">
+                    <h5 class=" font-weight-bold">Następny</h5>
+                </a>
+            </div>
+        </div>
+
+        @if (Model.eventsInWeek.Any())
+        {
+            <div class="row">
+                @foreach (var pair in Model.eventsInWeek)
+                {
+
+                    <div class="col-sm border border-dark rounded p-2 @((pair.Key % 7 == 6 || pair.Key % 7 == -1 || pair.Key % 7 == 0 ) && pair.Key != today ? "weekend" : "alldays") @(pair.Key == today ? "today" : "")">
+                        <h5 class="my-3 text-center font-weight-bold"> @ViewBag.Monday.AddDays(pair.Key).ToString("dd/MM/yyyy") </h5>
+                        @foreach (var eevent in pair.Value)
+                        {
+                            <button class="editEvent btn btn-block text-left my-1 @(@eevent.Priority == @Priority.HIGH ? "highP" : "") @(@eevent.Priority == @Priority.MEDIUM ? "mediumP" : "") @(@eevent.Priority == @Priority.LOW ? "lowP" : "")"
+                                    data-target="#editEventModal" data-toggle="modal" data-eeid="@eevent.Id" data-eename="@eevent.Name"
+                                    data-eeday="@eevent.From.Date.ToString("dd/MM/yyyy")" data-eepriority="@eevent.Priority"
+                                    data-eefromh="@eevent.From.ToString("HH")" data-eefromm="@eevent.From.ToString("mm")" data-eetoh="@eevent.To.ToString("HH")" data-eetom="@eevent.To.ToString("mm")">
+                                @eevent.From.ToString("HH:mm") - @eevent.To.ToString("HH:mm") @eevent.Name
+                            </button>
+
+                            <div class="modal" id="editEventModal">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form enctype="multipart/form-data" asp-controller="home" asp-action="editevent" asp-route-page="@Model.page" asp-route-uN="@User.Identity.Name" method="post" class="px-4 py-3">
+                                            <div class="modal-header pl-0">
+                                                <h5 class="modal-title">Zmień wydarzenie</h5>
+                                                <button type="button" class="close pt-0" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <input hidden asp-for="eventEdit.Id" class="eeid" />
+                                            <div class="form-group eename">
+                                                <input asp-for="eventEdit.Name" type="text" class="form-control" />
+                                            </div>
+                                            <div class="form-group day">
+                                                <label asp-for="eventEdit.Date"></label>
+                                                <input asp-for="eventEdit.Date" type="datetime" class="form-control" />
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="form-inline">
+                                                    <div class="form-group">
+                                                        <label class="mr-2">Od:</label>
+                                                        <select asp-for="eventEdit.FromHour" class="form-control fromh" asp-items="Model.hourNubers"></select>
+                                                        <label class="mx-2">:</label>
+                                                        <select asp-for="eventEdit.FromMinutes" class="form-control fromm" asp-items="Model.minutesNubers"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="form-inline">
+                                                    <div class="form-group">
+                                                        <label class="mr-2">Do:</label>
+                                                        <select asp-for="eventEdit.ToHour" class="form-control toh" asp-items="Model.hourNubers"></select>
+                                                        <label class="mx-2">:</label>
+                                                        <select asp-for="eventEdit.ToMinutes" class="form-control tom" asp-items="Model.minutesNubers"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label asp-for="eventEdit.Priority"></label>
+                                                <select asp-for="eventEdit.Priority" class="eeepriority custom-select mr-sm-2"
+                                                        asp-items="Html.GetEnumSelectList<Priority>()"></select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                                        </form>
+                                        <form enctype="multipart/form-data" asp-controller="home" asp-action="deleteevent" asp-route-page="@Model.page" asp-route-uN="@User.Identity.Name" method="post" class="px-4 py-3">
+                                            <input hidden asp-for="deleteId" class="eeid" />
+                                            <button type="submit" class="btn btn-danger">Usuń</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        }
+                        <div class="container" style="height:50px">
+                            <button class="btn btn-secondary px-2 py-0 greybtn rounded-circle bottomdiv" data-target="#addEventModal" data-toggle="modal" data-day="@ViewBag.Monday.AddDays(pair.Key).ToString("dd/MM/yyyy")">
+                                <h3 class=" font-weight-bold">+</h3>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal" id="addEventModal">
+                        <div class="modal-dialog" role="dialog">
+                            <div class="modal-content">
+                                <form enctype="multipart/form-data" asp-controller="home" asp-action="createevent" asp-route-page="@Model.page" asp-route-uN="@User.Identity.Name" method="post" class="px-4 py-3">
+                                    <div class="modal-header pl-0">
+                                        <h5 class="modal-title">Dodaj wydarzenie</h5>
+                                        <button type="button" class="close pt-0" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="form-group">
+                                        <input asp-for="eventCreate.Name" type="text" class="form-control" placeholder="Podaj nazwę" />
+                                    </div>
+                                    <div class="form-group day">
+                                        <label asp-for="eventCreate.Date"></label>
+                                        <input asp-for="eventCreate.Date" type="datetime" class="form-control" />
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-inline">
+                                            <div class="form-group">
+                                                <label class="mr-2">Od:</label>
+                                                <select asp-for="eventCreate.FromHour" class="form-control" asp-items="Model.hourNubers"></select>
+                                                <label class="mx-2">:</label>
+                                                <select asp-for="eventCreate.FromMinutes" class="form-control" asp-items="Model.minutesNubers"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-inline">
+                                            <div class="form-group">
+                                                <label class="mr-2">Do:</label>
+                                                <select asp-for="eventCreate.ToHour" class="form-control" asp-items="Model.hourNubers"></select>
+                                                <label class="mx-2">:</label>
+                                                <select asp-for="eventCreate.ToMinutes" class="form-control" asp-items="Model.minutesNubers"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="eventCreate.Priority"></label>
+                                        <select asp-for="eventCreate.Priority" class="custom-select mr-sm-2"
+                                                asp-items="Html.GetEnumSelectList<Priority>()"></select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+            </div>
+        }
+
+        @if (Model.eventsOtherUsers.Any())
+        {
+            @foreach (var otherUser in Model.eventsOtherUsers)
+            {
+                <h5 class="text-center mt-3 mb-1">@otherUser.userName</h5>
+                <div class="row">
+                    @foreach (var pair in otherUser.eventsInWeek)
+                    {
+
+                        <div class="col-sm border border-dark rounded p-2 @((pair.Key % 7 == 6 || pair.Key % 7 == -1 || pair.Key % 7 == 0 ) && pair.Key != today ? "weekend" : "alldays") @(pair.Key == today ? "today" : "")">
+                            <h5 class="my-3 text-center font-weight-bold"> @ViewBag.Monday.AddDays(pair.Key).ToString("dd/MM/yyyy") </h5>
+                            @foreach (var eevent in pair.Value)
+                            {
+                                <button class="editEvent btn btn-block text-left my-1 @(@eevent.Priority == @Priority.HIGH ? "highP" : "") @(@eevent.Priority == @Priority.MEDIUM ? "mediumP" : "") @(@eevent.Priority == @Priority.LOW ? "lowP" : "")">
+                                    @eevent.From.ToString("HH:mm") - @eevent.To.ToString("HH:mm") @eevent.Name
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $('#editEventModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget)
+            var eid = button.data('eeid')
+            var ename = button.data('eename')
+            var eday = button.data('eeday')
+            var efromh = button.data('eefromh')
+            var efromm = button.data('eefromm')
+            var etoh = button.data('eetoh')
+            var etom = button.data('eetom')
+            var epriority = button.data('eepriority')
+            var modal = $(this)
+            modal.find('.eeid').val(eid)
+            modal.find('.eename input').val(ename)
+            modal.find('.day input').val(eday)
+            modal.find('.fromh').val(efromh)
+            modal.find('.fromm').val(efromm)
+            modal.find('.toh').val(etoh)
+            modal.find('.tom').val(etom)
+            //modal.find('.eeepriority').val(epriority)
+        })
+
+        $('#addEventModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget)
+            var day = button.data('day')
+            var modal = $(this)
+            modal.find('.day input').val(day)
+        })
+    </script>
+}

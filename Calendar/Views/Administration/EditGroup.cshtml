@@ -1,0 +1,56 @@
+﻿@model EditGroupViewModel
+@{
+    ViewBag.Title = "Zarządzaj grupą";
+}
+<div class="container">
+    <div class="col">
+        <h1 class="text-center">Zarządzaj grupą</h1>
+
+
+        <form method="post" enctype="multipart/form-data" asp-controller="Administration" asp-action="EditGroup">
+            <input hidden asp-for="@Model.Id" />
+            <input hidden asp-for="@Model.UN" value="@User.Identity.Name"/>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Id: @Model.Id</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label asp-for="@Model.GroupName"></label>
+                        <input asp-for="@Model.GroupName" class="form-control" />
+                        <span asp-validation-for="@Model.GroupName" class="text-danger"></span>
+                    </div>
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Zmień nazwę</button>
+                    <a asp-action="MyGroups" asp-controller="Administration" asp-route-uN="@User.Identity.Name" class="btn btn-primary">Cofnij</a>
+                </div>
+            </div>
+            <br/>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Użytkownicy w tej grupie:</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Users.Any())
+                    {
+                        foreach (var user in Model.Users)
+                        {
+                            <h5>@user</h5>
+                        }
+                    }
+                    else
+                    {
+                        <h5>Obecnie brak użytkowników w tej grupie</h5>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Administration" asp-action="EditUsersInGroup" asp-route-Id="@Model.Id" class="btn btn-primary">Dodaj lub usuń użytkowników</a>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+</div>

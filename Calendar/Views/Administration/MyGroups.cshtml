@@ -1,0 +1,48 @@
+﻿@model List<IdentityRole>
+@{
+    ViewBag.Title = "Grupy którymi zarządzam";
+}
+<div class="container">
+    @if (Model.Any())
+    {
+        <div class="col">
+            <h1 class="text-center">Grupy którymi zarządzam</h1>
+            @foreach (var group in Model)
+            {
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Id grupy: @group.Id</h3>
+                    </div>
+                    <div class="card-body">
+                        <h3>Nazwa grupy: @group.Name</h3>
+                    </div>
+                    <div class="card-footer">
+                        <form method="post" asp-action="DeleteRole" asp-route-id="@group.Id" asp-route-uN="@User.Identity.Name">
+                            <a asp-action="EditGroup" asp-controller="Administration" asp-route-id="@group.Id" class="btn btn-primary">Zarządzaj</a>
+                            <span id="confirmDeleteSpan_@group.Id" style="display:none">
+                                <span>Czy na pewno chcesz usunąć gurpę?</span>
+                                <button type="submit" class="btn btn-danger">Tak</button>
+                                <a href="#" class="btn btn-primary" onclick="confirmDelete('@group.Id', false)">Nie</a>
+                            </span>
+                            <span id="deleteSpan_@group.Id">
+                                <a href="#" class="btn btn-danger" onclick="confirmDelete('@group.Id', true)">Usuń</a>
+                            </span>
+                        </form>
+                    </div>
+                </div>
+                <br />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="col">
+            <h1 class="text-center">Nie jesteś administratorem żadnej grupy</h1>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/CustomScript.js"></script>
+}
