@@ -28,6 +28,12 @@ namespace Calendar
                     logging.AddEventSourceLogger();
                     logging.AddNLog();
                 })
+                .ConfigureAppConfiguration(builder =>
+                {
+                    builder.AddConfiguration(new ConfigurationBuilder()
+                        .AddJsonFile("app.config")
+                        .Build());
+                })
                 .UseStartup<Startup>();
     }
 }

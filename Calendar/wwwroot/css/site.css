@@ -1,8 +1,13 @@
 ﻿body.color {
     background-color: #1d1e22;
+    color: #e2e2e2;
 }
 
-.alldays{
+.font-weight-bold {
+    color: #1d1e22;
+}
+
+.alldays {
     background-color: lavender;
 }
 

@@ -13,7 +13,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using System.Configuration;
 using Calendar.Security;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Calendar
 {
